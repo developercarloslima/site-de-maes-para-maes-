@@ -42,6 +42,22 @@
   $$('[data-close-modal]').forEach(el=>el.addEventListener('click',closeModal));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal()});
 
+  // CTA móvel discreto após o hero, sem encobrir escolhas de cookies.
+  const mobileBar=$('#mobile-purchase-bar');
+  const consentBanner=$('#cookie-banner');
+  function updateMobileCTA(){
+    if(!mobileBar)return;
+    const show=window.innerWidth<=580 && window.scrollY>650 && Boolean(consentBanner?.hidden);
+    mobileBar.hidden=!show;
+    document.body.classList.toggle('has-mobile-purchase',show);
+  }
+  window.addEventListener('scroll',updateMobileCTA,{passive:true});
+  window.addEventListener('resize',updateMobileCTA,{passive:true});
+  $('#cookie-accept')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
+  $('#cookie-reject')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
+  $('#cookie-settings')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
+  window.addEventListener('load',updateMobileCTA);
+
   $$('a[data-checkout]').forEach(a=>a.addEventListener('click',e=>{
     const link=config.checkoutUrl?.trim();
     if(!link||!/^https:\/\//i.test(link)){
