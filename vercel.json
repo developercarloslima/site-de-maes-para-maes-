@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/(.*\\.(css|js|webp|jpg|jpeg|png|svg|ico))",
+      "source": "/assets/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -10,7 +10,25 @@
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/css/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/js/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/:path*",
       "headers": [
         {
           "key": "X-Content-Type-Options",
