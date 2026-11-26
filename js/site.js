@@ -31,7 +31,7 @@
     const s=screens[button.dataset.screen]; if(!s)return;
     $$('.screen-tab').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});
     button.classList.add('active');button.setAttribute('aria-pressed','true');
-    const img=$('#active-screen');img.src=`assets/${s.img}`;img.alt=`Tela real do Colo de Mãe: ${s.name}`;
+    const img=$('#active-screen');img.src=`assets/${s.img}?v=20261126b`;img.alt=`Tela real do Colo de Mãe: ${s.name}`;
     $('#screen-caption').innerHTML=`<span class="caption-icon" aria-hidden="true">♥</span><div><strong>${s.title}</strong><p>${s.description}</p></div>`;
   }));
 
@@ -45,18 +45,25 @@
   // CTA móvel discreto após o hero, sem encobrir escolhas de cookies.
   const mobileBar=$('#mobile-purchase-bar');
   const consentBanner=$('#cookie-banner');
+  // Batch scroll/resize UI updates to avoid repeated style invalidations.
+  let mobileFrame=0;
   function updateMobileCTA(){
+    mobileFrame=0;
     if(!mobileBar)return;
     const show=window.innerWidth<=580 && window.scrollY>650 && Boolean(consentBanner?.hidden);
+    if(mobileBar.hidden===!show)return;
     mobileBar.hidden=!show;
     document.body.classList.toggle('has-mobile-purchase',show);
   }
-  window.addEventListener('scroll',updateMobileCTA,{passive:true});
-  window.addEventListener('resize',updateMobileCTA,{passive:true});
-  $('#cookie-accept')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
-  $('#cookie-reject')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
-  $('#cookie-settings')?.addEventListener('click',()=>requestAnimationFrame(updateMobileCTA));
-  window.addEventListener('load',updateMobileCTA);
+  function scheduleMobileCTA(){
+    if(!mobileFrame)mobileFrame=requestAnimationFrame(updateMobileCTA);
+  }
+  window.addEventListener('scroll',scheduleMobileCTA,{passive:true});
+  window.addEventListener('resize',scheduleMobileCTA,{passive:true});
+  $('#cookie-accept')?.addEventListener('click',scheduleMobileCTA);
+  $('#cookie-reject')?.addEventListener('click',scheduleMobileCTA);
+  $('#cookie-settings')?.addEventListener('click',scheduleMobileCTA);
+  window.addEventListener('load',scheduleMobileCTA);
 
   $$('a[data-checkout]').forEach(a=>a.addEventListener('click',e=>{
     const link=config.checkoutUrl?.trim();
