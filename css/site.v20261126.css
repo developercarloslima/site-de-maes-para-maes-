@@ -391,3 +391,22 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline-color:#3c7760
 
 @supports (content-visibility:auto){.empathy,.feature-section,.steps-section,.showcase,.interlude,.bonus-section,.faq-section{content-visibility:auto;contain-intrinsic-size:auto 640px}}
 @media (max-width:580px){.site-header{-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* Contraste WCAG AA — mantém os fundos e a identidade pastel originais. */
+:root{--muted:#405c4e}
+.section-kicker,.bonus-category,.final-cta p,
+.hero h1 em,.offer-copy h2 em,.final-cta h2 em,.interlude h2 em,
+.accent,.lacta-cover strong em{color:#854e46}
+.section-lead,.soft-card p,.feature-tile p,.step-card p,
+.screens-intro>p:not(.section-kicker),.screen-caption p,.center-gallery-note,
+.interlude p,.bonus-content>p:not(.bonus-category),
+.offer-copy>p:not(.eyebrow),.offer-label,.offer-value-caption,
+.secure-note,.offer-no-pressure,.faq-list details p,
+.footer-brand p,.footer-links a,.footer-links button,.footer-bottom,
+.cookie-text p,.modal-panel p,.legal-page p,.legal-page li,
+.gentle-note,.stage-label,.bonus-stamp,.bonus-note,
+.offer-eyebrow,.under-cta,.hero-mini-badges span,.hero-points,
+.eyebrow,.floating-chip,.screen-tab,.mobile-purchase-info small,
+.hero-description,.lacta-cover,.lacta-cover .cover-subtitle,.lacta-cover .cover-bottom,
+.step-number,.step-symbol,.mobile-purchase-info small{color:#405c4e}
+.hero-description strong,.bonus-included{color:#35594b}
