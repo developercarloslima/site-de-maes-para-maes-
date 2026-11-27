@@ -70,6 +70,7 @@
     if(!link||!/^https:\/\//i.test(link)){
       e.preventDefault();showModal();return;
     }
-    if(typeof window.coloTrackCheckout==='function')window.coloTrackCheckout();
+    // Refresh consented _fbc/_fbp and UTM parameters before opening Cakto.
+    if(typeof window.coloRefreshCheckoutLinks==='function')window.coloRefreshCheckoutLinks();
   }));
 })();
