@@ -9,7 +9,7 @@
 6. O checkout, preço e Pixel da Meta estão em `js/config.js`.
 
 ## Rastreamento
-- Pixel da Meta: `1722078432606863` — `PageView`, `ViewContent` e `InitiateCheckout` após consentimento de marketing.
+- Pixel da Meta: `1722078432606863` — `PageView` e `ViewContent` após consentimento de marketing. `InitiateCheckout` e `Purchase` são de responsabilidade da Cakto.
 - Preserva parâmetros UTM, `fbclid`, outros parâmetros recebidos e compõe `sck` para os botões do checkout.
 - A confirmação de `Purchase` precisa ser configurada/validada no checkout da Cakto.
 
@@ -26,3 +26,9 @@
 - Molduras metálicas com espessura e reflexos de vidro, Dynamic Island, barra de status e botões físicos.
 - Prints reais do aplicativo continuam dentro das telas sem substituição por imagens fictícias.
 - A nova aparência dos aparelhos está centralizada em `css/devices.css`.
+
+## Auditoria do rastreamento (27/11/2026)
+- Pixel noscript removido para evitar PageView antes de consentimento.
+- Parâmetros de URL restritos a `src`, `sck`, UTMs e IDs reais do Pixel Meta somente após consentimento.
+- Script Vercel Web Analytics preparado no HTML; habilitar Vercel Dashboard > Projeto > Analytics > Enable antes de validar dados.
+- A Cakto segue responsável por InitiateCheckout/Purchase e API de Conversões, sem integração duplicada.

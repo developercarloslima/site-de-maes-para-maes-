@@ -7,8 +7,8 @@
  * the checkout's native events and harm the funnel data.
  *
  * UTM and sck are carried to Cakto without requiring marketing cookies.
- * Only after marketing consent, _fbp and _fbc are added as optional query
- * parameters. Cakto must support them for server attribution to benefit.
+ * Only after consent, real fbclid and existing _fbp/_fbc may be forwarded.
+ * Whether Cakto uses these optional query parameters is not yet verified.
  * No Meta access tokens or personal customer data are stored in this script.
  */
 (()=>{
@@ -32,18 +32,19 @@
   let referrer=null;
   try{referrer=document.referrer?new URL(document.referrer):null;}catch{/* Invalid or unavailable referrer */}
   const refParams=new URLSearchParams(referrer?.search||'');
-  const keys=new Set(['utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id']);
-  for(const [key] of urlParams){if(key!=='sck')keys.add(key);}
+  // Cakto supports src, sck and UTM tags. Never forward arbitrary query keys.
+  const keys=new Set(['src','utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id']);
   for(const [key] of refParams){if(key.startsWith('utm_'))keys.add(key);}
   const params={};
   for(const key of keys){
-    let value=urlParams.get(key)??refParams.get(key);
+    let value=urlParams.get(key)??(key.startsWith('utm_')?refParams.get(key):null);
     if(key==='utm_source'&&!value)value=referrer?.hostname||'direto';
-    if(value)params[key]=value;
+    if(value&&value.length<=250)params[key]=value;
   }
-  const sckValues=(urlParams.get('sck')||'').split('|').filter(Boolean);
+  const inputSck=urlParams.get('sck')||'';
+  const sckValues=(inputSck.length<=600&&/^[A-Za-z0-9_.~|:-]*$/.test(inputSck)?inputSck:'').split('|').filter(Boolean);
   for(const value of Object.values(params)){
-    if(value&&!sckValues.includes(value))sckValues.push(value);
+    if(value&&value.length<=100&&!sckValues.includes(value))sckValues.push(value);
   }
 
   // Share pseudonymous Meta attribution identifiers ONLY after consent.
@@ -55,14 +56,10 @@
     if(/^fb\.1\.\d{10,13}\.[A-Za-z0-9._-]+$/.test(fbp))ids.fbp=fbp;
 
     const storedFbc=getCookie('_fbc');
-    if(/^fb\.1\.\d{10,13}\.[A-Za-z0-9._-]+$/.test(storedFbc)){
-      ids.fbc=storedFbc;
-    }else{
-      const clickId=urlParams.get('fbclid')||'';
-      if(/^[A-Za-z0-9_-]{10,500}$/.test(clickId)){
-        ids.fbc='fb.1.'+Date.now()+'.'+clickId;
-      }
-    }
+    if(/^fb\.1\.\d{10,13}\.[A-Za-z0-9._-]+$/.test(storedFbc))ids.fbc=storedFbc;
+    // Only forward a real click identifier. Never synthesize fbc/fbp values.
+    const clickId=urlParams.get('fbclid')||'';
+    if(/^[A-Za-z0-9_-]{10,500}$/.test(clickId))ids.fbclid=clickId;
     return ids;
   }
 
@@ -75,7 +72,7 @@
         if(!url.searchParams.has(key))url.searchParams.set(key,value);
       }
       if(!url.searchParams.has('sck')&&sckValues.length){
-        url.searchParams.set('sck',sckValues.join('|'));
+        url.searchParams.set('sck',sckValues.join('|').slice(0,600));
       }
       for(const [key,value] of Object.entries(metaIdentifiers())){
         url.searchParams.set(key,value);
@@ -117,8 +114,8 @@
     });
   }
 
-  function accept(){setConsent('accepted');if(banner)banner.hidden=true;startPixel();decorateCheckoutLinks();}
-  function reject(){setConsent('rejected');if(banner)banner.hidden=true;decorateCheckoutLinks();}
+  function accept(){setConsent('accepted');if(banner)banner.hidden=true;if(started&&window.fbq)window.fbq('consent','grant');startPixel();decorateCheckoutLinks();}
+  function reject(){setConsent('rejected');if(banner)banner.hidden=true;if(started&&window.fbq)window.fbq('consent','revoke');decorateCheckoutLinks();}
   document.getElementById('cookie-accept')?.addEventListener('click',accept);
   document.getElementById('cookie-reject')?.addEventListener('click',reject);
   document.getElementById('cookie-settings')?.addEventListener('click',()=>{
